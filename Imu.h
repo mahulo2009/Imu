@@ -8,7 +8,7 @@
 #include "Wire.h"
 #include "ADXL345.h"
 #include "ITG3200.h"
-#include "QMC5883L.h"
+#include <MechaQMC5883.h>
 
 #define G_TO_ACCEL 9.81
 #define MGAUSS_TO_UTESLA 0.1
@@ -35,7 +35,7 @@ class Imu : public ImuBase {
     
         ADXL345 accelerometer;
         ITG3200 gyroscope;
-        QMC5883L magnetometer;
+        MechaQMC5883  magnetometer;
 
 };
 #endif

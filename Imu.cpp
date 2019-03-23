@@ -22,11 +22,8 @@ boolean Imu::init()
     ret = gyroscope.testConnection();
     if(!ret)
         return false;
-    
-    Wire.beginTransmission(addr); //start talking
-    Wire.write(0x09); // Set the Register
-    Wire.write(0x1D); // Tell the HMC5883 to Continuously Measure
-    Wire.endTransmission();
+
+    magnetometer.init();
 
     return true;
 }
@@ -63,28 +60,16 @@ geometry_msgs::Vector3 Imu::readGyroscope()
 geometry_msgs::Vector3 Imu::readMagnetometer()
 {
     geometry_msgs::Vector3 mag;
-    int16_t mx, my, mz;
+    int mx, my, mz, mt;
+    mx = my = mz = 0;
 
-    //Tell the HMC what regist to begin writing data into
-    Wire.beginTransmission(addr);
-    Wire.write(0x00); //start with register 3.
-    Wire.endTransmission();
-  
- 
-    //Read the data.. 2 bytes for each axis.. 6 total bytes
-    Wire.requestFrom(addr, 6);
-    if(6<=Wire.available()){
-        mx = Wire.read()<<8; //MSB  x 
-        mx |= Wire.read(); //LSB  x
-        mz = Wire.read()<<8; //MSB  z
-        mz |= Wire.read(); //LSB z
-        my = Wire.read()<<8; //MSB y
-        my |= Wire.read(); //LSB y
-    }
-
-    mag.x = mx * (double) MAG_SCALE * UTESLA_TO_TESLA;
-    mag.y = my * (double) MAG_SCALE * UTESLA_TO_TESLA;
-    mag.z = mz * (double) MAG_SCALE * UTESLA_TO_TESLA;
+    
+    int r = magnetometer.read(&mx,&my,&mz);
+    
+    //MGUAS TO GAUS - GAUS TO TESLA
+    mag.x = mx *0.001 * 0.0001;
+    mag.y = my *0.001 * 0.0001;
+    mag.z = mz *0.001 * 0.0001;
 
     return mag;
 }
